@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { login } from '../authSlice';
+import { login } from './authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -71,15 +71,6 @@ const Login = () => {
         <div className="mt-5 text-center text-sm text-gray-600">
           <p>
             Forgot <span className="text-blue-600 hover:underline cursor-pointer">Password?</span>
-          </p>
-          <p className="mt-1">
-            Don’t have an account?{' '}
-            <span
-              className="text-blue-600 hover:underline cursor-pointer"
-              onClick={() => navigate('/signup')}
-            >
-              Sign up
-            </span>
           </p>
         </div>
       </div>
