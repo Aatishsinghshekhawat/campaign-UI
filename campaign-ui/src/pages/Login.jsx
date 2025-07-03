@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useDispatch } from 'react-redux';
-import { login } from './authSlice';
+import { login } from '../authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
@@ -21,6 +21,7 @@ const Login = () => {
 
     dispatch(login({ mobile }));
     alert('Login successful!');
+    navigate('/dashboard');
   };
 
   return (
@@ -67,12 +68,6 @@ const Login = () => {
             Sign In
           </button>
         </form>
-
-        <div className="mt-5 text-center text-sm text-gray-600">
-          <p>
-            Forgot <span className="text-blue-600 hover:underline cursor-pointer">Password?</span>
-          </p>
-        </div>
       </div>
     </div>
   );
