@@ -1,50 +1,52 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import authService from './authService';
 
-const token = localStorage.getItem('token');
+export const loginUser = createAsyncThunk(
+  'auth/loginUser',
+  async (userData, thunkAPI) => {
+    try {
+      const response = await authService.login(userData);
+      return response;
+    } catch (error) {
+      return thunkAPI.rejectWithValue(
+        error.response?.data?.message || 'Login failed'
+      );
+    }
+  }
+);
 
 const initialState = {
-  user: null,
-  token: token || null,
+  token: localStorage.getItem('token') || null,
+  user: JSON.parse(localStorage.getItem('user')) || null,
   loading: false,
   error: null,
 };
-
-export const login = createAsyncThunk('auth/login', async (userData, thunkAPI) => {
-  try {
-    const res = await authService.login(userData);
-    console.log('Login success:', res);
-    return res;
-  } catch (error) {
-    console.error('Login failed:', error);
-    return thunkAPI.rejectWithValue(error.response.data);
-  }
-});
-
 
 const authSlice = createSlice({
   name: 'auth',
   initialState,
   reducers: {
     logout: (state) => {
-      state.user = null;
       state.token = null;
+      state.user = null;
       localStorage.removeItem('token');
+      localStorage.removeItem('user');
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(login.pending, (state) => {
+      .addCase(loginUser.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(login.fulfilled, (state, action) => {
+      .addCase(loginUser.fulfilled, (state, action) => {
         state.loading = false;
-        state.user = action.payload.user;
         state.token = action.payload.token;
+        state.user = action.payload.user;
         localStorage.setItem('token', action.payload.token);
+        localStorage.setItem('user', JSON.stringify(action.payload.user));
       })
-      .addCase(login.rejected, (state, action) => {
+      .addCase(loginUser.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
       });
