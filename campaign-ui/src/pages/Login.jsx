@@ -1,74 +1,73 @@
-import React, { useState } from 'react';
-import { useDispatch } from 'react-redux';
-import { login } from '../authSlice';
+import React, { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { login } from '../features/auth/authSlice';
 import { useNavigate } from 'react-router-dom';
 
 const Login = () => {
+  const [mobile, setMobile] = useState('');
+  const [password, setPassword] = useState('');
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [mobile, setMobile] = useState('');
-  const [password, setPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
+  const { user, isSuccess } = useSelector((state) => state.auth);
 
   const handleSubmit = (e) => {
     e.preventDefault();
-
-    if (!mobile || !password) {
-      alert('Please fill in both fields.');
-      return;
-    }
-
-    dispatch(login({ mobile }));
-    alert('Login successful!');
-    navigate('/dashboard');
+    dispatch(login({ mobile, password }));
   };
 
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
-      <div className="bg-white shadow-md rounded-lg w-full max-w-md p-8">
-        <h2 className="text-3xl font-semibold text-center text-gray-800 mb-6">Login</h2>
+  // 🚀 Redirect after login
+  useEffect(() => {
+    if (isSuccess && user) {
+      navigate('/dashboard');
+    }
+  }, [isSuccess, user, navigate]);
 
-        <form onSubmit={handleSubmit} className="space-y-5">
+  return (
+    <div className="flex items-center justify-center min-h-screen bg-gray-100">
+      <form
+        onSubmit={handleSubmit}
+        className="bg-white p-8 rounded shadow-md w-full max-w-sm"
+      >
+        <h2 className="text-2xl font-bold mb-6 text-center text-gray-800">
+          Admin Login
+        </h2>
+
+        <div className="mb-4">
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Mobile Number
+          </label>
           <input
-            type="tel"
-            placeholder="Mobile Number"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            type="text"
             value={mobile}
             onChange={(e) => setMobile(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter your mobile number"
             required
-            pattern="[0-9]{10}"
-            maxLength={10}
           />
+        </div>
 
+        <div className="mb-6">
+          <label className="block text-gray-700 text-sm font-medium mb-2">
+            Password
+          </label>
           <input
-            type={showPassword ? 'text' : 'password'}
-            placeholder="Password"
-            className="w-full px-4 py-3 border border-gray-300 rounded-md focus:ring-2 focus:ring-blue-500"
+            type="password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
+            className="w-full border border-gray-300 p-2 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            placeholder="Enter your password"
             required
           />
+        </div>
 
-          <div className="flex items-center text-sm text-gray-700">
-            <input
-              type="checkbox"
-              id="showPassword"
-              checked={showPassword}
-              onChange={() => setShowPassword(!showPassword)}
-              className="mr-2"
-            />
-            <label htmlFor="showPassword">Show Password</label>
-          </div>
-
-          <button
-            type="submit"
-            className="w-full bg-blue-600 text-white py-3 rounded-md font-medium hover:bg-blue-700 transition"
-          >
-            Sign In
-          </button>
-        </form>
-      </div>
+        <button
+          type="submit"
+          className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded"
+        >
+          Login
+        </button>
+      </form>
     </div>
   );
 };
