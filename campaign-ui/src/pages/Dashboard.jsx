@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import UserList from './UserList'; // Make sure this path is correct
+import UserList from './UserList'; 
 
 const Dashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -22,7 +22,6 @@ const Dashboard = () => {
 
   return (
     <div className="min-h-screen flex">
-      {/* Sidebar */}
       <aside className="w-64 bg-gray-800 text-white p-6">
         <nav className="space-y-4">
           <button
@@ -44,7 +43,6 @@ const Dashboard = () => {
         </nav>
       </aside>
 
-      {/* Main Content */}
       <main className="flex-1 bg-gray-100 p-8">{renderContent()}</main>
     </div>
   );

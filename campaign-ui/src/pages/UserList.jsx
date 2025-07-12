@@ -4,14 +4,20 @@ import { FaTrashAlt, FaEye } from 'react-icons/fa';
 
 const UserList = () => {
   const [users, setUsers] = useState([]);
+  const [total, setTotal] = useState(0);
+  const [page, setPage] = useState(1);
+  const [limit] = useState(10); // fixed for now
 
   const fetchUsers = async () => {
     try {
       const token = localStorage.getItem('token');
-      const res = await axios.get('/user/list', {
+      const res = await axios.get(`/user/list?page=${page}&limit=${limit}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(res.data);
+
+      console.log('Fetched users:', res.data); // for debugging
+      setUsers(res.data.users); // ✅ correct based on backend
+      setTotal(res.data.total);
     } catch (err) {
       console.error('Failed to fetch users:', err);
     }
@@ -24,15 +30,18 @@ const UserList = () => {
       await axios.delete(`/user/${id}`, {
         headers: { Authorization: `Bearer ${token}` },
       });
-      setUsers(users.filter(user => user.id !== id));
+      // Refresh after delete
+      fetchUsers();
     } catch (err) {
       console.error('Failed to delete user:', err);
     }
   };
 
+  const totalPages = Math.ceil(total / limit);
+
   useEffect(() => {
     fetchUsers();
-  }, []);
+  }, [page]); // refetch when page changes
 
   return (
     <div className="bg-white p-6 rounded-xl shadow-md">
@@ -48,15 +57,17 @@ const UserList = () => {
               <th className="px-6 py-3 font-medium">Role</th>
               <th className="px-6 py-3 font-medium">Status</th>
               <th className="px-6 py-3 font-medium">Action</th>
-              <th className="px-6 py-3 font-medium">Delete / View</th>
+              <th className="px-6 py-3 font-medium">Tools</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-gray-100">
-            {users.map(user => (
+            {Array.isArray(users) && users.map(user => (
               <tr key={user.id} className="hover:bg-gray-50">
                 <td className="px-6 py-4 text-gray-800">{user.name}</td>
                 <td className="px-6 py-4 text-gray-800">{user.email}</td>
-                <td className="px-6 py-4 text-gray-800">{user.mobileCountryCode} {user.mobile}</td>
+                <td className="px-6 py-4 text-gray-800">
+                  {user.mobileCountryCode} {user.mobile}
+                </td>
                 <td className="px-6 py-4">
                   <span className="text-sm bg-purple-100 text-purple-800 px-2 py-1 rounded-full">
                     {user.role_title || 'User'}
@@ -86,15 +97,39 @@ const UserList = () => {
         </table>
       </div>
 
-      {/* Pagination Placeholder */}
+      {/* Pagination */}
       <div className="flex justify-between items-center mt-6">
-        <button className="text-sm text-gray-500 border px-3 py-1 rounded hover:bg-gray-100">Prev</button>
+        <button
+          className="text-sm text-gray-500 border px-3 py-1 rounded hover:bg-gray-100"
+          onClick={() => setPage(p => Math.max(p - 1, 1))}
+          disabled={page === 1}
+        >
+          Prev
+        </button>
+
         <div className="flex gap-2">
-          {[1, 2, 3].map((num) => (
-            <button key={num} className="text-sm text-blue-600 border border-blue-300 px-3 py-1 rounded hover:bg-blue-100">{num}</button>
+          {[...Array(totalPages)].map((_, idx) => (
+            <button
+              key={idx + 1}
+              onClick={() => setPage(idx + 1)}
+              className={`text-sm px-3 py-1 rounded border ${
+                page === idx + 1
+                  ? 'bg-blue-500 text-white border-blue-500'
+                  : 'text-blue-600 border-blue-300 hover:bg-blue-100'
+              }`}
+            >
+              {idx + 1}
+            </button>
           ))}
         </div>
-        <button className="text-sm text-gray-500 border px-3 py-1 rounded hover:bg-gray-100">Next</button>
+
+        <button
+          className="text-sm text-gray-500 border px-3 py-1 rounded hover:bg-gray-100"
+          onClick={() => setPage(p => Math.min(p + 1, totalPages))}
+          disabled={page === totalPages}
+        >
+          Next
+        </button>
       </div>
     </div>
   );
