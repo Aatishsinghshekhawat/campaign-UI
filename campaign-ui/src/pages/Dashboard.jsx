@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
-import UserList from './UserList'; 
+import UserList from './UserList';
+import List from './List';
 
 const Dashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
@@ -10,7 +11,7 @@ const Dashboard = () => {
     }
 
     if (activeView === 'lists') {
-      return <h2 className="text-xl text-gray-600">Lists View (Coming Soon)</h2>;
+      return <List />;
     }
 
     return (
@@ -24,6 +25,14 @@ const Dashboard = () => {
     <div className="min-h-screen flex">
       <aside className="w-64 bg-gray-800 text-white p-6">
         <nav className="space-y-4">
+          <button
+            onClick={() => setActiveView('dashboard')}
+            className={`block w-full text-left px-4 py-2 rounded ${
+              activeView === 'dashboard' ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Dashboard
+          </button>
           <button
             onClick={() => setActiveView('users')}
             className={`block w-full text-left px-4 py-2 rounded ${
@@ -40,6 +49,22 @@ const Dashboard = () => {
           >
             Lists
           </button>
+          <button
+            onClick={() => setActiveView('Template')}
+            className={`block w-full text-left px-4 py-2 rounded ${
+              activeView === 'Template' ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Template
+          </button>
+          <button
+            onClick={() => setActiveView('Campaign')}
+            className={`block w-full text-left px-4 py-2 rounded ${
+              activeView === 'Campaign' ? 'bg-gray-700' : 'hover:bg-gray-700'
+            }`}
+          >
+            Campaign
+          </button>
         </nav>
       </aside>
 
@@ -49,12 +74,3 @@ const Dashboard = () => {
 };
 
 export default Dashboard;
-
-// post API
-// frontend create
-// data should be json
-// in name there should only be alphatet and 
-// react hook form for form and for validation use yup 
-// check validation for react hook form library
-// password should be atleast 6 user
-// user list should be order by ID
