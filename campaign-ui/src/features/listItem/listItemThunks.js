@@ -1,34 +1,33 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../api/axios';
 
-// ✅ 1. Fetch list metadata (name, audience count, created date)
-export const fetchListMetaById = createAsyncThunk(
-  'listItem/fetchListMetaById',
-  async (id, { rejectWithValue }) => {
+export const fetchListItems = createAsyncThunk(
+  'listItems/fetchListItems',
+  async ({ listId, page = 1, limit = 10 }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`/list/item/list/${id}`, {
-        headers: { Authorization: `Bearer ${token}` }
-      });
+      const response = await axios.get(
+        `/list/item/filter?list_id=${listId}&page=${page}&limit=${limit}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.message || 'Failed to fetch list metadata');
+      return rejectWithValue(error?.response?.data?.message || 'Failed to fetch list items');
     }
   }
 );
 
-// ✅ 2. Fetch list items (email rows)
-export const fetchListItemById = createAsyncThunk(
-  'listItem/fetchListItemById',
+export const fetchListMeta = createAsyncThunk(
+  'listItems/fetchListMeta',
   async (listId, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`/list/item/filter?list_id=${listId}`, {
-        headers: { Authorization: `Bearer ${token}` }
+      const response = await axios.get(`/list/item/meta/${listId}`, {
+        headers: { Authorization: `Bearer ${token}` },
       });
-      return response.data.listItems;
+      return response.data;
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.message || 'Failed to fetch list items');
+      return rejectWithValue(error?.response?.data?.message || 'Failed to fetch list metadata');
     }
   }
 );

@@ -1,54 +1,114 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { fetchListItems } from "../features/listItem/listItemThunks";
 import { useParams } from "react-router-dom";
-import axios from "../api/axios";
+import { toast } from "react-toastify";
 
 const ListItem = () => {
-  const { id } = useParams();
-  const [listDetail, setListDetail] = useState(null);
+  const dispatch = useDispatch();
+  const { id: listId } = useParams();
+
+  const {
+    items = [],
+    loading,
+    error,
+    currentPage,
+    totalPages,
+  } = useSelector((state) => state.listItem || {});
+
+  // Get list metadata from list slice
+  const list = useSelector((state) =>
+    state.list?.lists?.find((l) => l.id === Number(listId))
+  );
 
   useEffect(() => {
-    const fetchListDetail = async () => {
-      try {
-        const token = localStorage.getItem("token");
-        const response = await axios.get(`/list/${id}`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
-        setListDetail(response.data);
-      } catch (error) {
-        console.error("Failed to fetch list detail:", error);
-      }
-    };
+    if (listId) {
+      dispatch(fetchListItems({ listId, page: currentPage }));
+    }
+  }, [dispatch, listId, currentPage]);
 
-    fetchListDetail();
-  }, [id]);
+  const handlePageChange = (newPage) => {
+    dispatch(fetchListItems({ listId, page: newPage }));
+  };
 
   return (
-    <div className="bg-white p-6 rounded-xl shadow-md">
-      {listDetail ? (
-        <>
-          <div className="mb-4">
-            <h2 className="text-2xl font-bold text-gray-700">{listDetail.name}</h2>
-            <p className="text-sm text-gray-500">
-              Audience: {listDetail.audienceCount} | Created:{" "}
-              {new Date(listDetail.createdDate).toLocaleDateString("en-IN", {
-                day: "2-digit",
-                month: "short",
-                year: "numeric",
-                hour: "2-digit",
-                minute: "2-digit",
-              })}
-            </p>
-          </div>
+    <div className="p-6">
+      {/* === Header Info === */}
+      <div className="mb-6">
+        <h2 className="text-2xl font-semibold mb-1">
+          {list?.name || "List Detail"}
+        </h2>
+        <p className="text-gray-600">
+          <span className="font-medium">Audience Count:</span>{" "}
+          {list?.audienceCount?.toLocaleString() || 0}
+        </p>
+        <p className="text-gray-600">
+          <span className="font-medium">Created:</span>{" "}
+          {list?.createdDate
+            ? new Date(list.createdDate).toLocaleDateString()
+            : "-"}
+        </p>
+      </div>
 
-          <div className="border-dashed border-2 border-gray-300 rounded p-4 text-center">
-            <p className="text-gray-600 mb-4">Upload a CSV to import list items.</p>
-            <button className="bg-blue-500 hover:bg-blue-600 text-white px-6 py-2 rounded" disabled>
-              Upload CSV
-            </button>
-          </div>
-        </>
+      {/* === Upload CSV Button === */}
+      <div className="flex justify-end mb-4">
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+          onClick={() => toast.info("CSV upload coming soon")}
+        >
+          Upload CSV
+        </button>
+      </div>
+
+      {/* === Table === */}
+      {loading ? (
+        <p>Loading...</p>
+      ) : error ? (
+        <p className="text-red-600">{error}</p>
+      ) : items.length === 0 ? (
+        <p>No list items found.</p>
       ) : (
-        <p className="text-gray-500">Loading list details...</p>
+        <>
+          <table className="min-w-full bg-white shadow rounded overflow-hidden">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="text-left px-4 py-2">S.No</th>
+                <th className="text-left px-4 py-2">Email</th>
+                <th className="text-left px-4 py-2">Created Date</th>
+              </tr>
+            </thead>
+            <tbody>
+              {items.map((item, index) => (
+                <tr key={item.id} className="border-t">
+                  <td className="px-4 py-2">{(currentPage - 1) * 10 + index + 1}</td>
+                  <td className="px-4 py-2">{item.email}</td>
+                  <td className="px-4 py-2">
+                    {new Date(item.createdDate).toLocaleDateString()}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+
+          {/* === Pagination === */}
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-4 space-x-2">
+              {Array.from({ length: totalPages }, (_, i) => (
+                <button
+                  key={i}
+                  onClick={() => handlePageChange(i + 1)}
+                  className={`px-3 py-1 rounded ${
+                    currentPage === i + 1
+                      ? "bg-blue-600 text-white"
+                      : "bg-gray-200 text-black"
+                  }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+            </div>
+          )}
+        </>
       )}
     </div>
   );

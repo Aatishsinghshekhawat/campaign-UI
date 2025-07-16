@@ -1,42 +1,39 @@
 import { createSlice } from '@reduxjs/toolkit';
-import { uploadCSV, fetchListMetaById } from './listItemThunks';
-
-const initialState = {
-  meta: null,
-  uploadStatus: 'idle',
-  error: null,
-};
+import { fetchListItems } from './listItemThunks';
 
 const listItemSlice = createSlice({
-  name: 'listItem',
-  initialState,
-  reducers: {},
+  name: 'listItems',
+  initialState: {
+    items: [],
+    total: 0,
+    page: 1,
+    limit: 10,
+    loading: false,
+    error: null,
+  },
+  reducers: {
+    setPage: (state, action) => {
+      state.page = action.payload;
+    },
+  },
   extraReducers: (builder) => {
     builder
-      .addCase(uploadCSV.pending, (state) => {
-        state.uploadStatus = 'loading';
-      })
-      .addCase(uploadCSV.fulfilled, (state, action) => {
-        state.uploadStatus = 'succeeded';
+      .addCase(fetchListItems.pending, (state) => {
+        state.loading = true;
         state.error = null;
       })
-      .addCase(uploadCSV.rejected, (state, action) => {
-        state.uploadStatus = 'failed';
-        state.error = action.payload;
+      .addCase(fetchListItems.fulfilled, (state, action) => {
+        state.loading = false;
+        state.items = action.payload.items;
+        state.total = action.payload.total;
+        state.limit = action.payload.limit;
       })
-
-      .addCase(fetchListMetaById.pending, (state) => {
-        state.meta = null;
-      })
-      .addCase(fetchListMetaById.fulfilled, (state, action) => {
-        state.meta = action.payload;
-        state.error = null;
-      })
-      .addCase(fetchListMetaById.rejected, (state, action) => {
-        state.meta = null;
-        state.error = action.payload;
+      .addCase(fetchListItems.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to fetch list items';
       });
   },
 });
 
+export const { setPage } = listItemSlice.actions;
 export default listItemSlice.reducer;

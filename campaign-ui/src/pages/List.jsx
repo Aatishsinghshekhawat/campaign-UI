@@ -1,107 +1,132 @@
-import React, { useEffect, useState } from 'react';
-import { useDispatch, useSelector } from 'react-redux';
-import { useParams } from 'react-router-dom';
-import { fetchListMetaById, fetchListItemById, uploadCSV } from '../features/listItem/listItemThunks';
-import { toast } from 'react-toastify';
+import React, { useEffect, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { setPage } from "../features/list/listSlice";
+import { fetchLists, addList } from "../features/list/listThunks";
+import { useNavigate } from "react-router-dom";
+import { FaEye, FaPen } from "react-icons/fa";
+import { toast } from "react-toastify";
 
-const ListItem = () => {
+const List = () => {
   const dispatch = useDispatch();
-  const { id } = useParams();
-  const [csvFile, setCsvFile] = useState(null);
+  const navigate = useNavigate();
 
-  const { listMeta, listItems, loading, error } = useSelector((state) => state.listItem || {});
+  const { lists, total, currentPage, limit, loading, error } = useSelector(
+    (state) => state.list
+  );
+
+  const [showForm, setShowForm] = useState(false);
+  const [name, setName] = useState("");
 
   useEffect(() => {
-    if (id) {
-      dispatch(fetchListMetaById(id));
-      dispatch(fetchListItemById(id)); // optional: only if fetching 1 item by ID
+    dispatch(fetchLists({ page: currentPage, limit }));
+  }, [dispatch, currentPage, limit]);
+
+  const handleAddList = async (e) => {
+    e.preventDefault();
+    if (!name.trim()) {
+      toast.error("List name is required");
+      return;
     }
-  }, [dispatch, id]);
-
-  const handleUpload = async () => {
-    if (!csvFile) return toast.error('Please select a CSV file to upload.');
-
-    const formData = new FormData();
-    formData.append('file', csvFile); // 🔄 key must be 'file' for backend
-    formData.append('listId', id);
 
     try {
-      await dispatch(uploadCSV({ file: csvFile })).unwrap();
-      toast.success('CSV uploaded successfully');
-      dispatch(fetchListItemById(id)); // Refresh items if needed
-      setCsvFile(null);
+      await dispatch(addList({ name })).unwrap();
+      toast.success("List added successfully");
+      setName("");
+      setShowForm(false);
+      dispatch(fetchLists({ page: currentPage, limit }));
     } catch (err) {
-      toast.error(err || 'Failed to upload CSV');
+      toast.error(err || "Failed to add list");
     }
   };
 
-  return (
-    <div className="p-6 bg-white rounded-xl shadow">
-      <div className="flex justify-between items-center mb-6">
-        <div>
-          <h2 className="text-2xl font-bold text-gray-800">
-            {listMeta?.name || 'Loading...'}
-          </h2>
-          <p className="text-sm text-gray-500">
-            Audience Count: <strong>{listMeta?.audienceCount ?? 0}</strong> | Created:{' '}
-            {listMeta?.createdDate
-              ? new Date(listMeta.createdDate).toLocaleDateString('en-IN', {
-                  day: '2-digit',
-                  month: 'short',
-                  year: 'numeric',
-                })
-              : '—'}
-          </p>
-        </div>
+  const totalPages = Math.ceil(total / limit);
 
-        <div className="flex gap-2 items-center">
-          <input
-            type="file"
-            accept=".csv"
-            onChange={(e) => setCsvFile(e.target.files[0])}
-            className="text-sm"
-          />
-          <button
-            onClick={handleUpload}
-            className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded"
-            disabled={!csvFile}
-          >
-            Upload CSV
-          </button>
-        </div>
+  const handlePageChange = (newPage) => {
+    if (newPage !== currentPage) {
+      dispatch(setPage(newPage));
+    }
+  };
+
+  const handleView = (id) => {
+    navigate(`/list/${id}`);
+  };
+
+  const handleEdit = (id) => {
+    navigate(`/list/${id}`);
+  };
+
+  return (
+    <div className="p-6">
+      <div className="flex justify-between items-center mb-4">
+        <h2 className="text-xl font-semibold">Lists</h2>
+        <button
+          className="bg-blue-600 text-white px-4 py-2 rounded"
+          onClick={() => setShowForm((prev) => !prev)}
+        >
+          {showForm ? "Cancel" : "Add List"}
+        </button>
       </div>
 
-      <div className="overflow-x-auto border rounded">
-        <table className="min-w-full text-sm divide-y divide-gray-200">
-          <thead className="bg-gray-100 text-gray-600">
+      {showForm && (
+        <form onSubmit={handleAddList} className="mb-4">
+          <input
+            type="text"
+            placeholder="List Name"
+            className="border px-3 py-2 rounded mr-2"
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <button
+            type="submit"
+            className="bg-green-600 text-white px-4 py-2 rounded"
+          >
+            Submit
+          </button>
+        </form>
+      )}
+
+      <div className="overflow-x-auto">
+        <table className="min-w-full bg-white border rounded shadow">
+          <thead className="bg-gray-100">
             <tr>
-              <th className="px-4 py-2 text-left">S.No.</th>
-              <th className="px-4 py-2 text-left">Email</th>
-              <th className="px-4 py-2 text-left">Variables</th>
-              <th className="px-4 py-2 text-left">Created</th>
+              <th className="py-2 px-4 border">S.No</th>
+              <th className="py-2 px-4 border">List Name</th>
+              <th className="py-2 px-4 border">Audience Count</th>
+              <th className="py-2 px-4 border">Created Date</th>
+              <th className="py-2 px-4 border">Actions</th>
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody>
             {loading ? (
               <tr>
-                <td colSpan="4" className="text-center py-4">Loading...</td>
+                <td colSpan="5" className="text-center py-4">
+                  Loading...
+                </td>
               </tr>
-            ) : error ? (
+            ) : lists.length === 0 ? (
               <tr>
-                <td colSpan="4" className="text-center text-red-500 py-4">{error}</td>
-              </tr>
-            ) : listItems?.length === 0 ? (
-              <tr>
-                <td colSpan="4" className="text-center text-gray-500 py-4">No items found</td>
+                <td colSpan="5" className="text-center py-4">
+                  No lists found
+                </td>
               </tr>
             ) : (
-              listItems?.map((item, index) => (
-                <tr key={item.id} className="hover:bg-gray-50">
-                  <td className="px-4 py-2">{index + 1}</td>
-                  <td className="px-4 py-2">{item.email}</td>
-                  <td className="px-4 py-2">{JSON.stringify(item.variables)}</td>
-                  <td className="px-4 py-2">
-                    {new Date(item.createdDate).toLocaleDateString('en-IN')}
+              lists.map((list, index) => (
+                <tr key={list.id} className="text-center">
+                  <td className="py-2 px-4 border">
+                    {(currentPage - 1) * limit + index + 1}
+                  </td>
+                  <td className="py-2 px-4 border">{list.name}</td>
+                  <td className="py-2 px-4 border">{list.audienceCount}</td>
+                  <td className="py-2 px-4 border">
+                    {new Date(list.createdDate).toLocaleDateString()}
+                  </td>
+                  <td className="py-2 px-4 border flex justify-center gap-4">
+                    <button onClick={() => handleView(list.id)} title="View">
+                      <FaEye className="text-blue-600 hover:text-blue-800" />
+                    </button>
+                    <button onClick={() => handleEdit(list.id)} title="Edit">
+                      <FaPen className="text-green-600 hover:text-green-800" />
+                    </button>
                   </td>
                 </tr>
               ))
@@ -109,8 +134,26 @@ const ListItem = () => {
           </tbody>
         </table>
       </div>
+
+      {totalPages > 1 && (
+        <div className="flex justify-center mt-4 gap-2">
+          {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pg) => (
+            <button
+              key={pg}
+              onClick={() => handlePageChange(pg)}
+              className={`px-3 py-1 border rounded ${
+                pg === currentPage
+                  ? "bg-blue-500 text-white"
+                  : "bg-white text-gray-700"
+              }`}
+            >
+              {pg}
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   );
 };
 
-export default ListItem;
+export default List;

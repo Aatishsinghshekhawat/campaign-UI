@@ -1,18 +1,19 @@
 import React, { useState } from 'react';
 import UserList from './UserList';
 import List from './List';
+import Template from './Template';
+import CreateTemplate from './CreateTemplate';
 
 const Dashboard = () => {
   const [activeView, setActiveView] = useState('dashboard');
 
   const renderContent = () => {
-    if (activeView === 'users') {
-      return <UserList />;
-    }
-
-    if (activeView === 'lists') {
-      return <List />;
-    }
+    if (activeView === 'users') return <UserList />;
+    if (activeView === 'lists') return <List />;
+    if (activeView === 'template')
+      return <Template onCreate={() => setActiveView('create-template')} />;
+    if (activeView === 'create-template')
+      return <CreateTemplate onCancel={() => setActiveView('template')} />;
 
     return (
       <h1 className="text-3xl font-semibold text-gray-700">
@@ -50,20 +51,14 @@ const Dashboard = () => {
             Lists
           </button>
           <button
-            onClick={() => setActiveView('Template')}
+            onClick={() => setActiveView('template')}
             className={`block w-full text-left px-4 py-2 rounded ${
-              activeView === 'Template' ? 'bg-gray-700' : 'hover:bg-gray-700'
+              activeView === 'template' || activeView === 'create-template'
+                ? 'bg-gray-700'
+                : 'hover:bg-gray-700'
             }`}
           >
             Template
-          </button>
-          <button
-            onClick={() => setActiveView('Campaign')}
-            className={`block w-full text-left px-4 py-2 rounded ${
-              activeView === 'Campaign' ? 'bg-gray-700' : 'hover:bg-gray-700'
-            }`}
-          >
-            Campaign
           </button>
         </nav>
       </aside>
