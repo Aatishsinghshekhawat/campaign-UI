@@ -3,19 +3,19 @@ import { fetchLists, addList, updateList } from './listThunks';
 
 const initialState = {
   lists: [],
+  total: 0,
+  page: 1,
+  limit: 5,
   loading: false,
   error: null,
-  currentPage: 1,
-  total: 0,
-  limit: 10,
 };
 
 const listSlice = createSlice({
   name: 'list',
   initialState,
   reducers: {
-    setPage(state, action) {
-      state.currentPage = action.payload;
+    setPage: (state, action) => {
+      state.page = action.payload;
     },
   },
   extraReducers: (builder) => {
@@ -26,23 +26,22 @@ const listSlice = createSlice({
       })
       .addCase(fetchLists.fulfilled, (state, action) => {
         state.loading = false;
-        state.lists = action.payload.lists;
-        state.total = action.payload.total;
-        state.limit = action.payload.limit;
-        state.currentPage = action.payload.page;
+        state.lists = action.payload.data || [];
+        state.total = action.payload.total || 0;
       })
       .addCase(fetchLists.rejected, (state, action) => {
         state.loading = false;
         state.error = action.payload;
+        state.lists = [];
+        state.total = 0;
       })
-      .addCase(addList.fulfilled, (state, action) => {
-        state.lists.unshift(action.payload);
+
+      .addCase(addList.rejected, (state, action) => {
+        state.error = action.payload;
       })
-      .addCase(updateList.fulfilled, (state, action) => {
-        const index = state.lists.findIndex((l) => l.id === action.payload.id);
-        if (index !== -1) {
-          state.lists[index] = action.payload;
-        }
+
+      .addCase(updateList.rejected, (state, action) => {
+        state.error = action.payload;
       });
   },
 });

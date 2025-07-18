@@ -10,9 +10,14 @@ const List = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const { lists, total, currentPage, limit, loading, error } = useSelector(
-    (state) => state.list
-  );
+  const {
+    lists = [],
+    total = 0,
+    currentPage = 1,
+    limit = 5,
+    loading = false,
+    error = null,
+  } = useSelector((state) => state.list || {});
 
   const [showForm, setShowForm] = useState(false);
   const [name, setName] = useState("");
@@ -42,18 +47,13 @@ const List = () => {
   const totalPages = Math.ceil(total / limit);
 
   const handlePageChange = (newPage) => {
-    if (newPage !== currentPage) {
+    if (newPage >= 1 && newPage <= totalPages) {
       dispatch(setPage(newPage));
     }
   };
 
-  const handleView = (id) => {
-    navigate(`/list/${id}`);
-  };
-
-  const handleEdit = (id) => {
-    navigate(`/list/${id}`);
-  };
+  const handleView = (id) => navigate(`/list/${id}`);
+  const handleEdit = (id) => navigate(`/list/${id}`);
 
   return (
     <div className="p-6">
@@ -103,7 +103,13 @@ const List = () => {
                   Loading...
                 </td>
               </tr>
-            ) : lists.length === 0 ? (
+            ) : error ? (
+              <tr>
+                <td colSpan="5" className="text-center py-4 text-red-600">
+                  {error}
+                </td>
+              </tr>
+            ) : (lists || []).length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center py-4">
                   No lists found
@@ -111,14 +117,16 @@ const List = () => {
               </tr>
             ) : (
               lists.map((list, index) => (
-                <tr key={list.id} className="text-center">
+                <tr key={list.id || index} className="text-center">
                   <td className="py-2 px-4 border">
                     {(currentPage - 1) * limit + index + 1}
                   </td>
                   <td className="py-2 px-4 border">{list.name}</td>
-                  <td className="py-2 px-4 border">{list.audienceCount}</td>
+                  <td className="py-2 px-4 border">{list.audienceCount ?? 0}</td>
                   <td className="py-2 px-4 border">
-                    {new Date(list.createdDate).toLocaleDateString()}
+                    {list.createdDate
+                      ? new Date(list.createdDate).toLocaleDateString()
+                      : "-"}
                   </td>
                   <td className="py-2 px-4 border flex justify-center gap-4">
                     <button onClick={() => handleView(list.id)} title="View">
@@ -136,7 +144,19 @@ const List = () => {
       </div>
 
       {totalPages > 1 && (
-        <div className="flex justify-center mt-4 gap-2">
+        <div className="flex justify-center mt-4 gap-2 flex-wrap">
+          <button
+            onClick={() => handlePageChange(currentPage - 1)}
+            disabled={currentPage === 1}
+            className={`px-3 py-1 border rounded ${
+              currentPage === 1
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            Prev
+          </button>
+
           {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pg) => (
             <button
               key={pg}
@@ -150,6 +170,18 @@ const List = () => {
               {pg}
             </button>
           ))}
+
+          <button
+            onClick={() => handlePageChange(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            className={`px-3 py-1 border rounded ${
+              currentPage === totalPages
+                ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                : "bg-white text-gray-700"
+            }`}
+          >
+            Next
+          </button>
         </div>
       )}
     </div>

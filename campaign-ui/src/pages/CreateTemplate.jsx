@@ -7,8 +7,7 @@ const CreateTemplate = ({ onCancel }) => {
   const handleSave = (e) => {
     e.preventDefault();
     console.log("Submitted:", { title, status });
-    // Placeholder for form submission logic
-    onCancel(); // Redirect back to template list after saving
+    onCancel(); 
   };
 
   return (

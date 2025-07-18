@@ -16,7 +16,6 @@ const ListItem = () => {
     totalPages,
   } = useSelector((state) => state.listItem || {});
 
-  // Get list metadata from list slice
   const list = useSelector((state) =>
     state.list?.lists?.find((l) => l.id === Number(listId))
   );
@@ -33,7 +32,6 @@ const ListItem = () => {
 
   return (
     <div className="p-6">
-      {/* === Header Info === */}
       <div className="mb-6">
         <h2 className="text-2xl font-semibold mb-1">
           {list?.name || "List Detail"}
@@ -50,7 +48,6 @@ const ListItem = () => {
         </p>
       </div>
 
-      {/* === Upload CSV Button === */}
       <div className="flex justify-end mb-4">
         <button
           className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
@@ -60,7 +57,6 @@ const ListItem = () => {
         </button>
       </div>
 
-      {/* === Table === */}
       {loading ? (
         <p>Loading...</p>
       ) : error ? (
@@ -90,7 +86,6 @@ const ListItem = () => {
             </tbody>
           </table>
 
-          {/* === Pagination === */}
           {totalPages > 1 && (
             <div className="flex justify-center mt-4 space-x-2">
               {Array.from({ length: totalPages }, (_, i) => (

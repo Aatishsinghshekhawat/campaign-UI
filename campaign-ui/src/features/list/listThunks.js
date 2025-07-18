@@ -1,74 +1,80 @@
 import { createAsyncThunk } from '@reduxjs/toolkit';
 import axios from '../../api/axios';
 
-// 1. Fetch paginated lists
 export const fetchLists = createAsyncThunk(
   'lists/fetchLists',
-  async ({ page = 1, limit = 10 }, { rejectWithValue }) => {
-    try {
-      const token = localStorage.getItem('token');
-      const response = await axios.get(`/list/filter?page=${page}&limit=${limit}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error?.response?.data?.message || 'Failed to fetch lists');
-    }
-  }
-);
-
-// 2. Add new list
-export const addList = createAsyncThunk(
-  'lists/addList',
-  async ({ name }, { rejectWithValue }) => {
+  async ({ page = 1, limit = 5 }, { rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.post(
-        `/list/add`,
-        { name },
+        '/list/filter',
+        { page, limit },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.message || 'Failed to add list');
+      return rejectWithValue(
+        error?.response?.data?.message || 'Failed to fetch lists'
+      );
     }
   }
 );
 
-// 3. Fetch a specific list by ID
-export const fetchListById = createAsyncThunk(
-  'lists/fetchListById',
-  async (id, { rejectWithValue }) => {
+export const addList = createAsyncThunk(
+  'lists/addList',
+  async ({ name }, { dispatch, rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
-      const response = await axios.get(`/list/${id}`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
+      const response = await axios.post(
+        '/list/add',
+        { name },
+        {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      dispatch(fetchLists({ page: 1, limit: 5 }));
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.message || 'Failed to fetch list details');
+      return rejectWithValue(
+        error?.response?.data?.message || 'Failed to add list'
+      );
     }
   }
 );
 
-// 4. Update list by ID
 export const updateList = createAsyncThunk(
   'lists/updateList',
-  async ({ id, name }, { rejectWithValue }) => {
+  async ({ id, name }, { dispatch, rejectWithValue }) => {
     try {
       const token = localStorage.getItem('token');
       const response = await axios.put(
         `/list/add/${id}`,
         { name },
         {
-          headers: { Authorization: `Bearer ${token}` },
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
         }
       );
+
+      dispatch(fetchLists({ page: 1, limit: 5 }));
+
       return response.data;
     } catch (error) {
-      return rejectWithValue(error?.response?.data?.message || 'Failed to update list');
+      return rejectWithValue(
+        error?.response?.data?.message || 'Failed to update list'
+      );
     }
   }
 );
