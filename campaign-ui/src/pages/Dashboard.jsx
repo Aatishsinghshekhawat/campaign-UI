@@ -1,69 +1,75 @@
-import React, { useState } from 'react';
-import UserList from './UserList';
-import List from './List';
-import Template from './Template';
-import CreateTemplate from './CreateTemplate';
+import React from "react";
+import { NavLink, Outlet, useLocation, matchPath } from "react-router-dom";
 
 const Dashboard = () => {
-  const [activeView, setActiveView] = useState('dashboard');
+  const location = useLocation();
 
-  const renderContent = () => {
-    if (activeView === 'users') return <UserList />;
-    if (activeView === 'lists') return <List />;
-    if (activeView === 'template')
-      return <Template onCreate={() => setActiveView('create-template')} />;
-    if (activeView === 'create-template')
-      return <CreateTemplate onCancel={() => setActiveView('template')} />;
+  const isDashboardHome =
+    location.pathname === "/dashboard" ||
+    location.pathname === "/" ||
+    matchPath({ path: "/", end: true }, location.pathname);
 
-    return (
-      <h1 className="text-3xl font-semibold text-gray-700">
-        Welcome to the Dashboard
-      </h1>
-    );
-  };
+  const isTemplatesActive = location.pathname.startsWith("/template");
 
   return (
-    <div className="min-h-screen flex">
-      <aside className="w-64 bg-gray-800 text-white p-6">
-        <nav className="space-y-4">
-          <button
-            onClick={() => setActiveView('dashboard')}
-            className={`block w-full text-left px-4 py-2 rounded ${
-              activeView === 'dashboard' ? 'bg-gray-700' : 'hover:bg-gray-700'
-            }`}
+    <div className="min-h-screen flex bg-gray-100">
+      <aside className="w-64 bg-gray-800 text-white p-6 flex flex-col">
+        <nav className="space-y-4 flex-1">
+          <NavLink
+            to="/dashboard"
+            end
+            className={({ isActive }) =>
+              `block w-full text-left px-4 py-2 rounded transition-colors duration-200 ${
+                isActive ? "bg-gray-700" : "hover:bg-gray-700"
+              }`
+            }
           >
             Dashboard
-          </button>
-          <button
-            onClick={() => setActiveView('users')}
-            className={`block w-full text-left px-4 py-2 rounded ${
-              activeView === 'users' ? 'bg-gray-700' : 'hover:bg-gray-700'
-            }`}
+          </NavLink>
+          <NavLink
+            to="/user/list"
+            className={({ isActive }) =>
+              `block w-full text-left px-4 py-2 rounded transition-colors duration-200 ${
+                isActive ? "bg-gray-700" : "hover:bg-gray-700"
+              }`
+            }
           >
             Users
-          </button>
-          <button
-            onClick={() => setActiveView('lists')}
-            className={`block w-full text-left px-4 py-2 rounded ${
-              activeView === 'lists' ? 'bg-gray-700' : 'hover:bg-gray-700'
-            }`}
+          </NavLink>
+          <NavLink
+            to="/list"
+            className={({ isActive }) =>
+              `block w-full text-left px-4 py-2 rounded transition-colors duration-200 ${
+                isActive ? "bg-gray-700" : "hover:bg-gray-700"
+              }`
+            }
           >
             Lists
-          </button>
-          <button
-            onClick={() => setActiveView('template')}
-            className={`block w-full text-left px-4 py-2 rounded ${
-              activeView === 'template' || activeView === 'create-template'
-                ? 'bg-gray-700'
-                : 'hover:bg-gray-700'
-            }`}
+          </NavLink>
+          <NavLink
+            to="/template"
+            className={() =>
+              `block w-full text-left px-4 py-2 rounded transition-colors duration-200 ${
+                isTemplatesActive ? "bg-gray-700" : "hover:bg-gray-700"
+              }`
+            }
           >
-            Template
-          </button>
+            Templates
+          </NavLink>
         </nav>
       </aside>
 
-      <main className="flex-1 bg-gray-100 p-8">{renderContent()}</main>
+      <main className="flex-1 p-8 overflow-auto bg-white">
+        {isDashboardHome ? (
+          <div>
+            <h1 className="text-3xl font-semibold text-gray-700">
+              Welcome to Dashboard
+            </h1>
+          </div>
+        ) : (
+          <Outlet />
+        )}
+      </main>
     </div>
   );
 };

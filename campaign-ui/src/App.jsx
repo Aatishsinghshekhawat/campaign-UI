@@ -1,59 +1,55 @@
-import React from 'react';
-import { BrowserRouter, Routes, Route } from 'react-router-dom';
-import Login from './pages/Login';
-import Dashboard from './pages/Dashboard';
-import PrivateRoute from './components/PrivateRoute.jsx';
-import ListItem from './pages/ListItem';
-import Template from './pages/Template';
-import { ToastContainer } from 'react-toastify';
-import 'react-toastify/dist/ReactToastify.css';
+import React from "react";
+import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import PrivateRoute from "./components/PrivateRoute.jsx";
+import List from "./pages/List";
+import ListItem from "./pages/ListItem";
+import TemplatePage from "./pages/TemplatePage";
+import TemplateBuilder from "./pages/TemplateBuilder";
 import CreateTemplate from "./pages/CreateTemplate";
+import TemplateView from "./pages/TemplateView";
+import UserList from "./pages/UserList";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
-const App = () => {
-  return (
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<Login />} />
+const DashboardLayout = () => <Dashboard />;
 
-        <Route
-          path="/dashboard"
-          element={
-            <PrivateRoute>
-              <Dashboard />
-            </PrivateRoute>
-          }
-        />
+const App = () => (
+  <BrowserRouter>
+    <Routes>
+      <Route path="/" element={<Login />} />
 
-        <Route
-          path="/list/:id"
-          element={
-            <PrivateRoute>
-              <ListItem />
-            </PrivateRoute>
-          }
-        />
+      <Route
+        element={
+          <PrivateRoute>
+            <DashboardLayout />
+          </PrivateRoute>
+        }
+      >
+        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="dashboard" element={<div className="text-3xl font-semibold text-gray-700">Welcome to Dashboard</div>} />
 
-        <Route
-          path="/template"
-          element={
-            <PrivateRoute>
-              <Template />
-            </PrivateRoute>
-          }
-        />
-        <Route
-          path="/template/create"
-          element={
-            <PrivateRoute>
-             <Dashboard initialView="create-template" />
-            </PrivateRoute>
-          }
-        /> 
-      </Routes>
+        <Route path="user/list" element={<UserList />} />
 
-      <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
-    </BrowserRouter>
-  );
-};
+        <Route path="list" element={<Outlet />}>
+          <Route index element={<List />} />
+          <Route path=":id" element={<ListItem />} />
+        </Route>
+
+        <Route path="template" element={<Outlet />}>
+          <Route index element={<TemplatePage />} />
+          <Route path="create" element={<CreateTemplate />} />
+          <Route path="builder/:id" element={<TemplateBuilder />} />
+          <Route path="view/:id" element={<TemplateView />} />
+        </Route>
+      </Route>
+
+      <Route path="*" element={<Navigate to="/" replace />} />
+    </Routes>
+
+    <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
+  </BrowserRouter>
+);
 
 export default App;

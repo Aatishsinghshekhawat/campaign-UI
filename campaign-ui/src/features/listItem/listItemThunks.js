@@ -39,3 +39,56 @@ export const fetchListMeta = createAsyncThunk(
     }
   }
 );
+
+export const uploadListItemsCSV = createAsyncThunk(
+  "listItems/uploadListItemsCSV",
+  async ({ listId, rows }, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem("token");
+      const response = await axios.post(
+        `/list/item/upload/${listId}`,
+        { rows },
+        {
+          headers: { Authorization: `Bearer ${token}` },
+        }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(
+        error?.response?.data?.message || "Failed to upload list items CSV"
+      );
+    }
+  }
+);
+
+export const deleteList = createAsyncThunk(
+  'listItems/deleteList',
+  async (listId, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.delete(
+        `/list/${listId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.message || 'Failed to delete list');
+    }
+  }
+);
+
+export const deleteListItem = createAsyncThunk(
+  'listItems/deleteListItem',
+  async (itemId, { rejectWithValue }) => {
+    try {
+      const token = localStorage.getItem('token');
+      const response = await axios.delete(
+        `/list/item/${itemId}`,
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error?.response?.data?.message || 'Failed to delete list item');
+    }
+  }
+);

@@ -1,8 +1,8 @@
-import { createSlice } from '@reduxjs/toolkit';
-import { fetchListItems } from './listItemThunks';
+import { createSlice } from "@reduxjs/toolkit";
+import { fetchListItems, uploadListItemsCSV } from "./listItemThunks";
 
 const listItemSlice = createSlice({
-  name: 'listItems',
+  name: "listItems",
   initialState: {
     items: [],
     total: 0,
@@ -26,11 +26,22 @@ const listItemSlice = createSlice({
         state.loading = false;
         state.items = action.payload.items;
         state.total = action.payload.total;
+        state.page = action.payload.page;
         state.limit = action.payload.limit;
       })
       .addCase(fetchListItems.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || 'Failed to fetch list items';
+        state.error = action.payload || "Failed to fetch list items";
+      })
+      .addCase(uploadListItemsCSV.pending, (state) => {
+        state.loading = true;
+      })
+      .addCase(uploadListItemsCSV.fulfilled, (state) => {
+        state.loading = false;
+      })
+      .addCase(uploadListItemsCSV.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || "Failed to upload list items";
       });
   },
 });

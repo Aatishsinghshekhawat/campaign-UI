@@ -16,7 +16,16 @@ export const fetchLists = createAsyncThunk(
           },
         }
       );
-      return response.data;
+
+      const total = response.data.total || 0;
+
+      return {
+        lists: response.data.lists || [],
+        total,
+        page: response.data.page || 1,
+        limit: response.data.limit || 5,
+        totalPages: Math.ceil(total / (response.data.limit || 5)),
+      };
     } catch (error) {
       return rejectWithValue(
         error?.response?.data?.message || 'Failed to fetch lists'

@@ -9,12 +9,12 @@ import { toast } from "react-toastify";
 const List = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
-
   const {
     lists = [],
     total = 0,
-    currentPage = 1,
+    page = 1,
     limit = 5,
+    totalPages = 1,
     loading = false,
     error = null,
   } = useSelector((state) => state.list || {});
@@ -23,8 +23,8 @@ const List = () => {
   const [name, setName] = useState("");
 
   useEffect(() => {
-    dispatch(fetchLists({ page: currentPage, limit }));
-  }, [dispatch, currentPage, limit]);
+    dispatch(fetchLists({ page, limit }));
+  }, [dispatch, page, limit]);
 
   const handleAddList = async (e) => {
     e.preventDefault();
@@ -32,28 +32,25 @@ const List = () => {
       toast.error("List name is required");
       return;
     }
-
     try {
       await dispatch(addList({ name })).unwrap();
       toast.success("List added successfully");
       setName("");
       setShowForm(false);
-      dispatch(fetchLists({ page: currentPage, limit }));
+      dispatch(setPage(1));
     } catch (err) {
       toast.error(err || "Failed to add list");
     }
   };
 
-  const totalPages = Math.ceil(total / limit);
-
   const handlePageChange = (newPage) => {
-    if (newPage >= 1 && newPage <= totalPages) {
-      dispatch(setPage(newPage));
-    }
+    if (newPage >= 1 && newPage <= totalPages) dispatch(setPage(newPage));
   };
 
   const handleView = (id) => navigate(`/list/${id}`);
   const handleEdit = (id) => navigate(`/list/${id}`);
+
+  const shouldShowPagination = (totalPages || 0) > 1 && lists.length > 0;
 
   return (
     <div className="p-6">
@@ -109,7 +106,7 @@ const List = () => {
                   {error}
                 </td>
               </tr>
-            ) : (lists || []).length === 0 ? (
+            ) : lists.length === 0 ? (
               <tr>
                 <td colSpan="5" className="text-center py-4">
                   No lists found
@@ -119,7 +116,7 @@ const List = () => {
               lists.map((list, index) => (
                 <tr key={list.id || index} className="text-center">
                   <td className="py-2 px-4 border">
-                    {(currentPage - 1) * limit + index + 1}
+                    {(page - 1) * limit + index + 1}
                   </td>
                   <td className="py-2 px-4 border">{list.name}</td>
                   <td className="py-2 px-4 border">{list.audienceCount ?? 0}</td>
@@ -129,10 +126,16 @@ const List = () => {
                       : "-"}
                   </td>
                   <td className="py-2 px-4 border flex justify-center gap-4">
-                    <button onClick={() => handleView(list.id)} title="View">
+                    <button
+                      onClick={() => handleView(list.id)}
+                      title="View"
+                    >
                       <FaEye className="text-blue-600 hover:text-blue-800" />
                     </button>
-                    <button onClick={() => handleEdit(list.id)} title="Edit">
+                    <button
+                      onClick={() => handleEdit(list.id)}
+                      title="Edit"
+                    >
                       <FaPen className="text-green-600 hover:text-green-800" />
                     </button>
                   </td>
@@ -143,26 +146,25 @@ const List = () => {
         </table>
       </div>
 
-      {totalPages > 1 && (
+      {shouldShowPagination && (
         <div className="flex justify-center mt-4 gap-2 flex-wrap">
           <button
-            onClick={() => handlePageChange(currentPage - 1)}
-            disabled={currentPage === 1}
+            onClick={() => handlePageChange(page - 1)}
+            disabled={page === 1}
             className={`px-3 py-1 border rounded ${
-              currentPage === 1
+              page === 1
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-white text-gray-700"
             }`}
           >
             Prev
           </button>
-
           {Array.from({ length: totalPages }, (_, idx) => idx + 1).map((pg) => (
             <button
               key={pg}
               onClick={() => handlePageChange(pg)}
               className={`px-3 py-1 border rounded ${
-                pg === currentPage
+                pg === page
                   ? "bg-blue-500 text-white"
                   : "bg-white text-gray-700"
               }`}
@@ -170,12 +172,11 @@ const List = () => {
               {pg}
             </button>
           ))}
-
           <button
-            onClick={() => handlePageChange(currentPage + 1)}
-            disabled={currentPage === totalPages}
+            onClick={() => handlePageChange(page + 1)}
+            disabled={page === totalPages}
             className={`px-3 py-1 border rounded ${
-              currentPage === totalPages
+              page === totalPages
                 ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                 : "bg-white text-gray-700"
             }`}

@@ -1,56 +1,113 @@
-import React, { useState } from "react";
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
+import axios from '../api/axios';
 
-const CreateTemplate = ({ onCancel }) => {
-  const [title, setTitle] = useState("");
-  const [status, setStatus] = useState("");
+const statusOptions = [
+  { value: '', label: 'Select' },
+  { value: 'enabled', label: 'Enabled' },
+  { value: 'disabled', label: 'Disabled' },
+];
 
-  const handleSave = (e) => {
+const CreateTemplate = () => {
+  const [title, setTitle] = useState('');
+  const [status, setStatus] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [touched, setTouched] = useState(false);
+  const [error, setError] = useState({});
+
+  const navigate = useNavigate();
+
+  const validate = () => {
+    let err = {};
+    if (!title.trim()) err.title = 'Title is required';
+    if (!status) err.status = 'Status is required';
+    return err;
+  };
+
+  const handleSave = async (e) => {
     e.preventDefault();
-    console.log("Submitted:", { title, status });
-    onCancel(); 
+    setTouched(true);
+    const err = validate();
+    setError(err);
+    if (Object.keys(err).length !== 0) return;
+
+    setLoading(true);
+    try {
+      await axios.post('/template/add', { title: title.trim(), status });
+      navigate('/template');
+    } catch (e) {
+      setError({ api: e.response?.data?.message || 'Creation failed' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleCancel = (e) => {
+    e.preventDefault();
+    navigate('/template');
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 bg-white rounded shadow">
-      <h2 className="text-2xl font-semibold mb-4">Create Template</h2>
-      <form onSubmit={handleSave}>
-        <div className="mb-4">
-          <label className="block font-medium mb-1">Title</label>
+    <div className="max-w-md mx-auto bg-white p-8 rounded shadow-md my-12 border">
+      <h1 className="text-2xl font-bold mb-6">Create Template</h1>
+      <form>
+        <div className="mb-5">
+          <label htmlFor="title" className="block text-sm mb-1 font-medium text-gray-700">
+            Title
+          </label>
           <input
+            id="title"
             type="text"
-            placeholder="Enter title"
-            className="w-full border px-3 py-2 rounded"
+            autoFocus
             value={title}
-            onChange={(e) => setTitle(e.target.value)}
-            required
+            onChange={e => setTitle(e.target.value)}
+            onBlur={() => setTouched(true)}
+            className="w-full border rounded px-3 py-2 text-gray-700 focus:outline-none focus:border-blue-500"
+            placeholder="Enter title"
+            autoComplete="off"
           />
+          {touched && error.title && (
+            <div className="text-red-500 text-xs mt-1">{error.title}</div>
+          )}
         </div>
 
-        <div className="mb-6">
-          <label className="block font-medium mb-1">Status</label>
+        <div className="mb-8">
+          <label htmlFor="status" className="block text-sm mb-1 font-medium text-gray-700">
+            Status
+          </label>
           <select
-            className="w-full border px-3 py-2 rounded"
+            id="status"
             value={status}
-            onChange={(e) => setStatus(e.target.value)}
-            required
+            onChange={e => setStatus(e.target.value)}
+            onBlur={() => setTouched(true)}
+            className="w-full border rounded px-3 py-2 text-gray-700 bg-white focus:outline-none focus:border-blue-500"
           >
-            <option value="">Select</option>
-            <option value="Enabled">Enabled</option>
-            <option value="Disabled">Disabled</option>
+            {statusOptions.map(opt => (
+              <option key={opt.value} value={opt.value} disabled={opt.value === ''}>
+                {opt.label}
+              </option>
+            ))}
           </select>
+          {touched && error.status && (
+            <div className="text-red-500 text-xs mt-1">{error.status}</div>
+          )}
         </div>
 
-        <div className="flex space-x-4">
+        {error.api && <div className="mb-3 text-red-500 text-xs">{error.api}</div>}
+
+        <div className="flex gap-2">
           <button
+            onClick={handleSave}
+            disabled={loading}
+            className="bg-blue-600 hover:bg-blue-700 text-white px-8 py-2 rounded font-semibold transition"
             type="submit"
-            className="bg-blue-600 text-white px-6 py-2 rounded hover:bg-blue-700"
           >
-            Save
+            {loading ? 'Saving...' : 'Save'}
           </button>
           <button
+            onClick={handleCancel}
             type="button"
-            onClick={onCancel}
-            className="bg-gray-300 text-black px-6 py-2 rounded hover:bg-gray-400"
+            className="bg-gray-200 hover:bg-gray-300 text-gray-800 px-8 py-2 rounded font-semibold transition border"
           >
             Cancel
           </button>
