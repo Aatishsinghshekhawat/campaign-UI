@@ -20,7 +20,6 @@ export const fetchListItems = createAsyncThunk(
   }
 );
 
-
 export const fetchListMeta = createAsyncThunk(
   'listItems/fetchListMeta',
   async (listId, { rejectWithValue }) => {
@@ -41,10 +40,10 @@ export const fetchListMeta = createAsyncThunk(
 );
 
 export const uploadListItemsCSV = createAsyncThunk(
-  "listItems/uploadListItemsCSV",
+  'listItems/uploadListItemsCSV',
   async ({ listId, rows }, { rejectWithValue }) => {
     try {
-      const token = localStorage.getItem("token");
+      const token = localStorage.getItem('token');
       const response = await axios.post(
         `/list/item/upload/${listId}`,
         { rows },
@@ -54,9 +53,7 @@ export const uploadListItemsCSV = createAsyncThunk(
       );
       return response.data;
     } catch (error) {
-      return rejectWithValue(
-        error?.response?.data?.message || "Failed to upload list items CSV"
-      );
+      return rejectWithValue(error?.response?.data?.message || 'Failed to upload list items CSV');
     }
   }
 );

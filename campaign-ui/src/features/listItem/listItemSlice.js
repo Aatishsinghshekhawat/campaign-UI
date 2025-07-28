@@ -1,8 +1,8 @@
-import { createSlice } from "@reduxjs/toolkit";
-import { fetchListItems, uploadListItemsCSV } from "./listItemThunks";
+import { createSlice } from '@reduxjs/toolkit';
+import { fetchListItems, uploadListItemsCSV, deleteList, deleteListItem } from './listItemThunks';
 
 const listItemSlice = createSlice({
-  name: "listItems",
+  name: 'listItems',
   initialState: {
     items: [],
     total: 0,
@@ -24,24 +24,52 @@ const listItemSlice = createSlice({
       })
       .addCase(fetchListItems.fulfilled, (state, action) => {
         state.loading = false;
-        state.items = action.payload.items;
-        state.total = action.payload.total;
-        state.page = action.payload.page;
-        state.limit = action.payload.limit;
+        state.items = action.payload.items || [];
+        state.total = action.payload.total || 0;
+        state.page = action.payload.page || 1;
+        state.limit = action.payload.limit || 10;
       })
       .addCase(fetchListItems.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to fetch list items";
+        state.error = action.payload || 'Failed to fetch list items';
       })
+
       .addCase(uploadListItemsCSV.pending, (state) => {
         state.loading = true;
+        state.error = null;
       })
       .addCase(uploadListItemsCSV.fulfilled, (state) => {
         state.loading = false;
       })
       .addCase(uploadListItemsCSV.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload || "Failed to upload list items";
+        state.error = action.payload || 'Failed to upload list items';
+      })
+
+      .addCase(deleteList.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(deleteList.fulfilled, (state) => {
+        state.loading = false;
+        state.items = [];
+        state.total = 0;
+        state.page = 1;
+        state.limit = 10;
+      })
+      .addCase(deleteList.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.payload || 'Failed to delete list';
+      })
+      .addCase(deleteListItem.pending, (state) => {
+        state.error = null;
+      })
+      .addCase(deleteListItem.fulfilled, (state, action) => {
+        state.items = state.items.filter(item => item.id !== action.meta.arg);
+        state.total = state.total > 0 ? state.total - 1 : 0;
+      })
+      .addCase(deleteListItem.rejected, (state, action) => {
+        state.error = action.payload || 'Failed to delete list item';
       });
   },
 });

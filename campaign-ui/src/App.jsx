@@ -12,6 +12,7 @@ import TemplateView from "./pages/TemplateView";
 import UserList from "./pages/UserList";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
+import CampaignsPage from "./pages/CampaignsPage";
 
 const DashboardLayout = () => <Dashboard />;
 
@@ -23,7 +24,9 @@ const App = () => (
       <Route
         element={
           <PrivateRoute>
-            <DashboardLayout />
+            <Dashboard>
+            <Outlet />
+          </Dashboard>
           </PrivateRoute>
         }
       >
@@ -42,6 +45,9 @@ const App = () => (
           <Route path="create" element={<CreateTemplate />} />
           <Route path="builder/:id" element={<TemplateBuilder />} />
           <Route path="view/:id" element={<TemplateView />} />
+        </Route>
+        <Route path="campaigns" element={<Outlet />}>
+          <Route index element={<CampaignsPage />} />
         </Route>
       </Route>
 
