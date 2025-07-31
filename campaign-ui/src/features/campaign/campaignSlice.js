@@ -19,7 +19,7 @@ const campaignSlice = createSlice({
     },
     setNameFilter(state, action) {
       state.nameFilter = action.payload;
-      state.page = 1;
+      state.page = 1; // Reset page on filter
     },
     resetFilters(state) {
       state.nameFilter = "";
