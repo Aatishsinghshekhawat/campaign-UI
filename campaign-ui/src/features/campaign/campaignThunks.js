@@ -4,7 +4,6 @@ import {
   fetchCampaignsFailure,
 } from "./campaignSlice";
 
-// Helper to get auth header from localStorage
 const getTokenHeader = () => {
   const token = localStorage.getItem("token");
   return token ? { Authorization: `Bearer ${token}` } : {};
@@ -14,7 +13,7 @@ export const fetchCampaigns = ({ page, limit, name }) => async (dispatch) => {
   try {
     dispatch(fetchCampaignsStart());
 
-    const response = await fetch("/campaign/list", { // if using proxy; else prefix with your backend baseURL
+    const response = await fetch("/campaign/list", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -50,8 +49,6 @@ export const copyCampaign = (id) => async (dispatch, getState) => {
       const data = await response.json();
       throw new Error(data.message || "API error");
     }
-    // Optionally, show notification
-    // Refetch campaigns after copy
     const { page, limit, nameFilter } = getState().campaign;
     dispatch(fetchCampaigns({ page, limit, name: nameFilter }));
   } catch (error) {

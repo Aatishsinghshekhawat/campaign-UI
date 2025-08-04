@@ -4,12 +4,8 @@ import { NavLink, Outlet, useLocation, matchPath } from "react-router-dom";
 const Dashboard = () => {
   const location = useLocation();
 
-  const isDashboardHome =
-    location.pathname === "/dashboard" ||
-    location.pathname === "/" ||
-    matchPath({ path: "/", end: true }, location.pathname);
-
   const isTemplatesActive = location.pathname.startsWith("/template");
+  const isCampaignsActive = location.pathname.startsWith("/campaigns");
 
   return (
     <div className="min-h-screen flex bg-gray-100">
@@ -57,29 +53,20 @@ const Dashboard = () => {
             Templates
           </NavLink>
           <NavLink
-            to="/campaign"
+            to="/campaigns"
             className={({ isActive }) =>
               `block w-full text-left px-4 py-2 rounded transition-colors duration-200 ${
-                isActive ? "bg-gray-700" : "hover:bg-gray-700"
+                isActive || isCampaignsActive ? "bg-gray-700" : "hover:bg-gray-700"
               }`
             }
           >
-            Campaign
+            Campaigns
           </NavLink>
-
         </nav>
       </aside>
 
       <main className="flex-1 p-8 overflow-auto bg-white">
-        {isDashboardHome ? (
-          <div>
-            <h1 className="text-3xl font-semibold text-gray-700">
-              Welcome to Dashboard
-            </h1>
-          </div>
-        ) : (
-          <Outlet />
-        )}
+        <Outlet />
       </main>
     </div>
   );

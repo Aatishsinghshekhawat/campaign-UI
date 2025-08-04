@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useDispatch } from 'react-redux';
 import { loginUser } from "../features/auth/authSlice";
 import { useNavigate } from 'react-router-dom';
@@ -7,20 +7,22 @@ const Login = () => {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  const [formData, setFormData] = useState({
-    mobile: '',
-    password: ''
-  });
+  const [formData, setFormData] = useState({ mobile: '', password: '' });
+
+  useEffect(() => {
+    const token = localStorage.getItem('token');
+    if (token) {
+      navigate('/dashboard', { replace: true });
+    }
+  }, [navigate]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const resultAction = await dispatch(loginUser(formData));
-
     if (loginUser.fulfilled.match(resultAction)) {
       localStorage.setItem('token', resultAction.payload.token);
       localStorage.setItem('user', JSON.stringify(resultAction.payload.user));
-      console.log('Login success:', resultAction.payload);
       navigate('/dashboard');
     } else {
       console.log('Login failed:', resultAction.payload || resultAction.error);
@@ -34,11 +36,8 @@ const Login = () => {
         className="bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4 w-full max-w-sm"
       >
         <h2 className="text-2xl font-bold mb-6 text-center text-gray-700">Login Page</h2>
-
         <div className="mb-4">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="mobile">
-            Mobile Number
-          </label>
+          <label htmlFor="mobile" className="block text-gray-700 text-sm font-bold mb-2">Mobile Number</label>
           <input
             id="mobile"
             type="text"
@@ -49,11 +48,8 @@ const Login = () => {
             required
           />
         </div>
-
         <div className="mb-6">
-          <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="password">
-            Password
-          </label>
+          <label htmlFor="password" className="block text-gray-700 text-sm font-bold mb-2">Password</label>
           <input
             id="password"
             type="password"
@@ -64,15 +60,12 @@ const Login = () => {
             required
           />
         </div>
-
-        <div className="flex items-center justify-between">
-          <button
-            type="submit"
-            className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
-          >
-            Login
-          </button>
-        </div>
+        <button
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline w-full"
+        >
+          Login
+        </button>
       </form>
     </div>
   );

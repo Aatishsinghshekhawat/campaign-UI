@@ -1,5 +1,5 @@
 import React from "react";
-import { BrowserRouter, Routes, Route, Navigate, Outlet } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import PrivateRoute from "./components/PrivateRoute.jsx";
@@ -10,9 +10,13 @@ import TemplateBuilder from "./pages/TemplateBuilder";
 import CreateTemplate from "./pages/CreateTemplate";
 import TemplateView from "./pages/TemplateView";
 import UserList from "./pages/UserList";
+import CampaignsPage from "./pages/CampaignsPage";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-import CampaignsPage from "./pages/CampaignsPage";
+
+const WelcomeDashboard = () => (
+  <div className="text-3xl font-semibold text-gray-700">Welcome to Dashboard</div>
+);
 
 const DashboardLayout = () => <Dashboard />;
 
@@ -20,35 +24,27 @@ const App = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />} />
-
+      
       <Route
         element={
           <PrivateRoute>
-            <Dashboard>
-            <Outlet />
-          </Dashboard>
+            <DashboardLayout />
           </PrivateRoute>
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<div className="text-3xl font-semibold text-gray-700">Welcome to Dashboard</div>} />
+
+        <Route path="dashboard" element={<WelcomeDashboard />} />
 
         <Route path="user/list" element={<UserList />} />
+        <Route path="list" element={<List />} />
+        <Route path="list/:id" element={<ListItem />} />
+        <Route path="template" element={<TemplatePage />} />
+        <Route path="template/create" element={<CreateTemplate />} />
+        <Route path="template/builder/:id" element={<TemplateBuilder />} />
+        <Route path="template/view/:id" element={<TemplateView />} />
 
-        <Route path="list" element={<Outlet />}>
-          <Route index element={<List />} />
-          <Route path=":id" element={<ListItem />} />
-        </Route>
-
-        <Route path="template" element={<Outlet />}>
-          <Route index element={<TemplatePage />} />
-          <Route path="create" element={<CreateTemplate />} />
-          <Route path="builder/:id" element={<TemplateBuilder />} />
-          <Route path="view/:id" element={<TemplateView />} />
-        </Route>
-        <Route path="campaigns" element={<Outlet />}>
-          <Route index element={<CampaignsPage />} />
-        </Route>
+        <Route path="campaigns" element={<CampaignsPage />} />
       </Route>
 
       <Route path="*" element={<Navigate to="/" replace />} />
