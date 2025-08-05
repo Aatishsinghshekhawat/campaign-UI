@@ -2,7 +2,7 @@ import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
-import PrivateRoute from "./components/PrivateRoute.jsx";
+import PrivateRoute from "./components/PrivateRoute";
 import List from "./pages/List";
 import ListItem from "./pages/ListItem";
 import TemplatePage from "./pages/TemplatePage";
@@ -11,6 +11,7 @@ import CreateTemplate from "./pages/CreateTemplate";
 import TemplateView from "./pages/TemplateView";
 import UserList from "./pages/UserList";
 import CampaignsPage from "./pages/CampaignsPage";
+import CreateCampaign from "./pages/CreateCampaign";
 import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
@@ -24,7 +25,6 @@ const App = () => (
   <BrowserRouter>
     <Routes>
       <Route path="/" element={<Login />} />
-      
       <Route
         element={
           <PrivateRoute>
@@ -33,9 +33,7 @@ const App = () => (
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
-
         <Route path="dashboard" element={<WelcomeDashboard />} />
-
         <Route path="user/list" element={<UserList />} />
         <Route path="list" element={<List />} />
         <Route path="list/:id" element={<ListItem />} />
@@ -43,13 +41,11 @@ const App = () => (
         <Route path="template/create" element={<CreateTemplate />} />
         <Route path="template/builder/:id" element={<TemplateBuilder />} />
         <Route path="template/view/:id" element={<TemplateView />} />
-
         <Route path="campaigns" element={<CampaignsPage />} />
+        <Route path="campaigns/create" element={<CreateCampaign />} />
       </Route>
-
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
-
     <ToastContainer position="top-right" autoClose={3000} hideProgressBar />
   </BrowserRouter>
 );

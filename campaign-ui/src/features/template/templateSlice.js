@@ -42,7 +42,6 @@ const templateSlice = createSlice({
         state.error = action.payload || "Failed to fetch templates";
       })
       .addCase(updateTemplateContent.fulfilled, (state, action) => {
-        // Find and update template
         const idx = state.templates.findIndex((tpl) => tpl.id === action.payload.id);
         if (idx !== -1) {
           state.templates[idx].content = action.payload.content;
